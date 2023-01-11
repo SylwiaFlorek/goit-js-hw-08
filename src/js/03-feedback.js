@@ -1,33 +1,33 @@
-import throttle from 'lodash.throttle';
+let throttle = require('lodash.throttle');
+let inputForm = document.querySelector('.feedback-form');
+let inputEmail = inputForm.querySelector('label > input');
+let inputText = inputForm.querySelector('label > textarea');
 
-const form = document.querySelector('.feedback-form');
-form.addEventListener('input', () => {
-  // zapisujemy aktualne wartości pól formularza do storage
+inputForm.addEventListener(
+  'input',
+  throttle(() => {
+    let storedInput = {
+      email: inputEmail.value,
+      message: inputText.value,
+    };
+    localStorage.setItem('feedback-form-state', JSON.stringify(storedInput));
+  }, 500)
+);
+
+let storedOutput = JSON.parse(localStorage.getItem('feedback-form-state'));
+
+if (localStorage.getItem('feedback-form-state') === null) {
+  inputEmail.value = '';
+  inputText.value = '';
+} else {
+  inputEmail.value = storedOutput.email;
+  inputText.value = storedOutput.message;
+}
+
+inputForm.addEventListener('submit', event => {
+  event.preventDefault();
+  console.log(localStorage.getItem('feedback-form-state'));
+  inputEmail.value = '';
+  inputText.value = '';
+  localStorage.removeItem('feedback-form-state');
 });
-
-form.addEventListener('input', () => {
-    const email = form.elements.email.value;
-    const message = form.elements.message.value;
-    localStorage.setItem('feedback-form-state', JSON.stringify({ email, message }));
-  });
-
-  window.addEventListener('load', () => {
-    const formState = localStorage.getItem('feedback-form-state');
-    if (formState) {
-      const { email, message } = JSON.parse(formState);
-      form.elements.email.value = email;
-      form.elements.message.value = message;
-    }
-  });
-
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    form.reset();
-    localStorage.removeItem('feedback-form-state');
-    console.log({ email: form.elements.email.value, message: form.elements.message.value });
-  });
-
-  form.addEventListener('input', throttle(() => {
-    const email = form.elements.email.value;
-  }));
-  
